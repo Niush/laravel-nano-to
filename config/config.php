@@ -10,11 +10,19 @@ return [
     'webhook_secret' => env('NANO_WEBHOOK_SECRET'),
 
     /**
-     * Address that receives Nano.
-     * One if these is chosen randomly.
+     * Provide Allowed Currencies
+     * Supports: nano
+     */
+    'currencies' => ["nano"],
+
+    /**
+     * Address that receives certain currencies.
+     * One of these is chosen randomly per symbol used.
      */
     'accounts' => [
-        //
+        'nano' => [
+            //
+        ]
     ],
 
     /**

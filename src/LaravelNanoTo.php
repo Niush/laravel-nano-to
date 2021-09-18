@@ -2,7 +2,9 @@
 
 namespace Niush\LaravelNanoTo;
 
+use Error;
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
@@ -14,11 +16,14 @@ class LaravelNanoTo
     public $amount;
     public $suggest;
     public $checkout_url;
+    public $webhook_secret;
+    public $symbol = 'nano';
 
     public function __construct()
     {
         $this->title = config('laravel-nano-to.title');
         $this->description = config('laravel-nano-to.description');
+        $this->webhook_secret = config('laravel-nano-to.webhook_secret');
     }
 
     /**
@@ -67,6 +72,18 @@ class LaravelNanoTo
     }
 
     /**
+     * Use Custom Webhook Secret
+     *
+     * @params string $secret
+     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     */
+    public function secret($secret)
+    {
+        $this->webhook_secret = strval($secret);
+        return $this;
+    }
+
+    /**
      * Redirect to the Nano.to Gateway URL
      *
      * @params integer|string $unique_id
@@ -75,7 +92,7 @@ class LaravelNanoTo
      */
     public function create($unique_id = null, $callback = null)
     {
-        $accounts = config('laravel-nano-to.accounts');
+        $accounts = config('laravel-nano-to.accounts.'.$this->symbol, []);
         $success_url = Route::has(config('laravel-nano-to.success_url'))
         ? route(config('laravel-nano-to.success_url'), $unique_id)
         : config('laravel-nano-to.success_url');
@@ -102,7 +119,7 @@ class LaravelNanoTo
             '&success_url=' . $success_url .
             '&cancel_url=' . $cancel_url .
             '&webhook_url=' . $webhook_url .
-            '&webhook_secret=' . config('laravel-nano-to.webhook_secret');
+            '&webhook_secret=' . $this->webhook_secret;
 
             if ($this->amount) {
                 $url .= '&price=' . $this->amount;
@@ -112,7 +129,23 @@ class LaravelNanoTo
 
             try {
                 $client = new Client(['allow_redirects' => ['track_redirects' => true]]);
-                $response = $client->get($url);
+
+                // Fake Nano.to response if testing.
+                if (App::environment() == 'testing') {
+                    $response = new Response(200, [
+                        'Content-Type' => 'text/html; charset=utf-8',
+                        'X-Guzzle-Redirect-History' => [
+                            'https://example.com/1',
+                            'https://example.com/2'
+                        ],
+                        'X-Guzzle-Redirect-Status-History' => [
+                            "301",
+                            "302"
+                        ]
+                    ]);
+                } else {
+                    $response = $client->get($url);
+                }
                 // var_dump($response->getBody()->getContents());
                 $this->checkout_url = last($response->getHeader(\GuzzleHttp\RedirectMiddleware::HISTORY_HEADER));
 
@@ -120,7 +153,7 @@ class LaravelNanoTo
                     return $this->throw_checkout_page_not_loaded();
                 } else {
                     if ($callback) {
-                        $callback($this->checkout_url);
+                        $callback($this->checkout_url, $url);
                     } else {
                         if (!$unique_id) {
                             return $this->send();
@@ -130,6 +163,7 @@ class LaravelNanoTo
                     return $this;
                 }
             } catch (\Exception $e) {
+                if (App::environment() == 'testing') { dd($e); }
                 return $this->throw_checkout_page_not_loaded();
             }
         } else {

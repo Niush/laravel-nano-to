@@ -59,8 +59,8 @@ For initiating Payment process:
 
 ```php
 // 1) With Specific Amount
-return LaravelNanoTo::amount(10)->create($order->id, function($checkout_url) {
-    // Do Something with $checkout_url if required.
+return LaravelNanoTo::amount(10)->create($order->id, function($checkout_url, $original_url) {
+    // Do Something with $checkout_url or $original_url if required.
 })->send();
 
 // 2) With Custom Info (Else uses title and description from config)
@@ -81,6 +81,14 @@ return LaravelNanoTo::create();
 
 // Receiving Nano Address will randomly be picked from config file.
 ```
+
+**You might want to use custom Webhook Secret. So that, it is always different for each checkout. So, instead of using same environment variable. You can do:**
+```php
+return LaravelNanoTo::amount(10)->secret(
+    config("laravel-nano-to.webhook_secret") . $order->secret_id . $user->id
+)->create($order->id)->send();
+```
+
 
 ## Webhook Response Example
 ```json
@@ -133,7 +141,7 @@ $request->header('Webhook-Secret') == config("laravel-nano-to.webhook_secret") /
 }
 ```
 ```php
-// Compare the body, store required info in DB and finally update the order status.
+// Compare the body, store required info in DB and finally update the order status. In Webhook Controller.
 $request->input('amount') == $order->amount_in_usd;
 $request->input('status') == "complete";
 $request->input('metadata.payment.subtype') == "receive";
@@ -153,7 +161,7 @@ Add translation for these messages if required.
 
 
 ### Testing
-WIP. Tests have not been implemented yet. Contributions are welcome.
+In Progress. Contributions are welcome.
 ```bash
 composer test
 ```
