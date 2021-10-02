@@ -22,7 +22,7 @@ php artisan vendor:publish --provider="Niush\LaravelNanoTo\LaravelNanoToServiceP
 Update config file (``config/laravel-nano-to.php``) with your desired settings. Use ``env`` where ever required.
 
 ## Configuration
-Add Nano Webhook Secret in your env file. Make sure it is difficult to guess with random string. **DO NOT USE APP_ENV**.
+Add Nano Webhook Secret in your env file. Make sure it is difficult to guess with random string. **DO NOT USE SAME AS APP_ENV**.
 ```
 NANO_WEBHOOK_SECRET=
 ```
@@ -91,7 +91,7 @@ return LaravelNanoTo::amount(10)->secret(
 
 
 ## Webhook Response Example
-```json
+```js
 // Request Headers
 {
   "Accept": "application/json, text/plain, */*",
@@ -106,7 +106,7 @@ return LaravelNanoTo::amount(10)->secret(
 $request->header('Webhook-Secret') == config("laravel-nano-to.webhook_secret") // Valid
 ```
 
-```json
+```js
 // Request Body (JSON)
 {
   "id": "ffceexxxxxx", // Transaction ID of Nano.to
@@ -153,6 +153,40 @@ $order->status = "complete";
 $order-save();
 ```
 
+### Full Example of Webhook Controller
+<details>
+  <summary>Click to expand!</summary>
+  
+```php
+public function webhook(Request $request, Order $order) {
+    if($request->header('Webhook-Secret') != config("laravel-nano-to.webhook_secret")) {
+        $order->status = "failed"; // Webhook Secret is MALFORMED
+        $order->remarks = "Payment Verification Malformed";
+    }
+    else {
+        if(
+            $request->input('amount') == $order->amount_in_usd &&
+            $request->input('status') == "complete" &&
+            $request->input('metadata.payment.subtype') == "receive" &&
+            $request->input('metadata.payment.hash')
+        ) {
+            $order->status = "complete";
+            $order->hash = $request->input('metadata.payment.hash');
+            $order->remarks = "Payment Complete from Address: " . $request->input('metadata.payment.account') . " , with Amount: " . $request->input('method.amount');
+            $order->save();
+        }
+        else {
+            $order->status = "failed"; // Payment Amount is not correct or not complete etc.
+            $order->remarks = "Payment Was Not Fully Completed";
+        }
+    }
+
+    $order->save();
+
+    return ["success" => true];
+}
+```
+</details>
 
 ### Translation
 Add translation for these messages if required.

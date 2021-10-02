@@ -42,20 +42,20 @@ return [
     'success_url' => 'nano-to-success',
 
     /**
-     * Named Route to Re-direct when Nano payment is cancelled.
+     * Named Route to Re-direct when Nano payment is cancelled. e.g. /order/cancel/{id}
      * If Named Route not found, it will use the string as full url itself. Useful for sending to different domain etc.
      */
     'cancel_url' => 'nano-to-cancel',
 
     /**
-     * Named Route for Webhook to update the order status.
+     * Named Route for Webhook to update the order status. e.g. /order/webhook/{id}
      * If Named Route not found, it will use the string as full url itself. Useful for sending to different domain etc.
      */
     'webhook_url' => 'nano-to-webhook',
 
     /**
      * For non production test, you might want to use web based webhook inspector like; octohook, posthook etc.
-     * It will automatically be used, if environment is not production.
+     * It will automatically be used, if provided and environment is not production.
      */
     'local_webhook_url' => '', // https://octo.hk/xxxxxx
 ];
