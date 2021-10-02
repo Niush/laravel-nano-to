@@ -2,8 +2,9 @@
 
 Easily integrate [Nano.to](https://nano.to/) Payment Gateway in Laravel Application, with full control.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/niush/laravel-nano-to.svg?style=flat-square)](https://packagist.org/packages/niush/laravel-nano-to)
-[![Total Downloads](https://img.shields.io/packagist/dt/niush/laravel-nano-to.svg?style=flat-square)](https://packagist.org/packages/niush/laravel-nano-to)
+[![Latest Stable Version](http://poser.pugx.org/niush/laravel-nano-to/v)](https://packagist.org/packages/niush/laravel-nano-to)
+[![Total Downloads](http://poser.pugx.org/niush/laravel-nano-to/downloads)](https://packagist.org/packages/niush/laravel-nano-to)
+[![PHP Version Require](http://poser.pugx.org/niush/laravel-nano-to/require/php)](https://packagist.org/packages/niush/laravel-nano-to)
 ![GitHub Actions](https://github.com/niush/laravel-nano-to/actions/workflows/main.yml/badge.svg)
 
 ## Installation on Laravel
