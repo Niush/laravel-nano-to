@@ -36,6 +36,21 @@ return [
     'description' => '<b>Please make the payment as specified.</b>',
 
     /**
+     * Business Name & Logo (Publicly Accessible Full URL) for customization
+     */
+    'business' => [
+        "name" => env('APP_NAME'),
+        "logo" => "",
+        "favicon" => ""
+    ],
+
+    /**
+     * Basic UI Customization
+     */
+    "background" => "#eeeeee",
+    "color" => "#111111",
+
+    /**
      * Named Route to Re-direct when Nano payment is successful. e.g. /order/success/{id}
      * If Named Route not found, it will use the string as full url itself. Useful for sending to different domain etc.
      */

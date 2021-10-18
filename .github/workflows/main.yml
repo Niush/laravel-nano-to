@@ -1,4 +1,4 @@
-name: run-tests
+name: tests
 
 on:
     push:
@@ -9,6 +9,8 @@ on:
 jobs:
     test:
         runs-on: ${{ matrix.os }}
+        env:
+            USE_REAL_API: true
         strategy:
             fail-fast: true
             matrix:

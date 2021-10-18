@@ -2,9 +2,9 @@
 
 Easily integrate [Nano.to](https://nano.to/) Payment Gateway in Laravel Application, with full control.
 
-[![Latest Stable Version](http://poser.pugx.org/niush/laravel-nano-to/v)](https://packagist.org/packages/niush/laravel-nano-to)
-[![Total Downloads](http://poser.pugx.org/niush/laravel-nano-to/downloads)](https://packagist.org/packages/niush/laravel-nano-to)
-[![PHP Version Require](http://poser.pugx.org/niush/laravel-nano-to/require/php)](https://packagist.org/packages/niush/laravel-nano-to)
+[![Latest Stable Version](https://poser.pugx.org/niush/laravel-nano-to/v)](https://packagist.org/packages/niush/laravel-nano-to)
+[![Total Downloads](https://poser.pugx.org/niush/laravel-nano-to/downloads)](https://packagist.org/packages/niush/laravel-nano-to)
+[![PHP Version Require](https://poser.pugx.org/niush/laravel-nano-to/require/php)](https://packagist.org/packages/niush/laravel-nano-to)
 ![GitHub Actions](https://github.com/niush/laravel-nano-to/actions/workflows/main.yml/badge.svg)
 
 ## Installation on Laravel
@@ -31,7 +31,7 @@ NANO_WEBHOOK_SECRET=
 Go through the generated config file and update as required. Make sure the Nano address all belongs to you and is accessible. You can provide, default title and description.
 
 ## Required Named Routes
-For this to work properly, you must have these 3 named routes created to handle your business logic.
+For this to work properly, you must have these 3 named routes created to handle your business logic. **The named route can always be customized in config file**.
 - `nano-to-success`: Redirected when Payment is successful. Do not confirm the payment using this route. The confirmation must be handled in webhook url.
     ```php
     Route::get('/order/success/{id}', [OrderController::class, 'success'])->name('nano-to-success'); // E.g. Shows a static order success page.
@@ -54,14 +54,15 @@ By default the config accepts named route for webhook and success page. If you w
 As, you have full control, it can easily be implemented via APIs also.
 
 ## Usage
-**NOTE: Amount is always in USD Currency.**
+**NOTE: Amount is always in USD Currency.** (You can use rough USDT to Fiat conversion [helper function](#advanced-usage))
 
 For initiating Payment process: 
 
 ```php
 // 1) With Specific Amount
-return LaravelNanoTo::amount(10)->create($order->id, function($checkout_url, $original_url) {
-    // Do Something with $checkout_url or $original_url if required.
+return LaravelNanoTo::amount(10)->create($order->id, function($checkout_url) {
+    // Do Something with $checkout_url if required.
+    // For SPA send link as JSON response etc.
 })->send();
 
 // 2) With Custom Info (Else uses title and description from config)
@@ -69,18 +70,28 @@ return LaravelNanoTo::info("Payment for Subscription", "<i>Also accepts HTML</i>
 ->amount(9.99)
 ->create($order->id)->send();
 
-// 3) For Suggest based payment. Useful in cases like Donation.
+// 3) With Additional Metadata (Can be received in Webhook)
+return LaravelNanoTo::amount(9.99)->metadata([
+    "user_id" => $user->id,
+    "order_id" => $order->id
+])->create($order->id)->send();
+
+// 4) For Suggest based payment. Useful in cases like Donation.
 return LaravelNanoTo::info("Donate Us")
 ->suggest([
-    ["name" => "Coffee", "amount" => "10"],
-    ["name" => "Meal", "amount" => "50"] 
+    ["name" => "Coffee", "price" => "10"],
+    ["name" => "Meal", "price" => "50"] 
 ])
 ->create($uuid)->send();
 
-// 4) Or Simply, if no need to track anything. And, required routes do not need {id} param.
+// 5) Use RAW friendly Amount in QR Codes (e.g. for Natrium)
+return LaravelNanoTo::asRaw()->amount(9.99)->create($order->id)->send();
+
+// 6) Or Simply, if no need to track anything. And, required routes do not need {id} param.
 return LaravelNanoTo::create();
 
 // Receiving Nano Address will randomly be picked from config file.
+// The first parameter of create (e.g. $order->id) will be used as params in named routes. 
 ```
 
 **You might want to use custom Webhook Secret. So that, it is always different for each checkout. So, instead of using same environment variable. You can do:**
@@ -119,25 +130,33 @@ $request->header('Webhook-Secret') == config("laravel-nano-to.webhook_secret") /
     "name": "Nano",
     "rate": "5.589960", // Currency Rate (Nano → USD)
     "amount": "1.788115", // Nano Received
-    "value": "0.01"
+    "value": "0.01",
+    "raw": false
   },
-  "metadata": {
-    "payment": { // Block Information
+  "plan": { // If using Suggest mode
+    "price": 10,
+    "name": "Meal"
+  },
+  "block": { // Block Information
       "type": "state",
       "representative": "nano_3chart...",
       "link": "391D8B81DB...",
-      "balance": "372647920414...",
+      "balance": "3.726479",
       "previous": "1922BFA40E86C....",
       "subtype": "receive", // You must be receiving :)
       "account": "nano_36qn7ydq...", // Sender Address
-      "amount": "1788115000000000000...", // RAW Nano
+      "amount": "1.788115", // Nano Received
       "local_timestamp": "1631954...",
       "height": "37",
       "hash": "9829B0306E5269A9A0...", // Transaction Identifier (Most important piece to store.)
       "work": "210862fa...",
       "signature": "CC16D6519C1113767EA36..",
-      "timestamp": "16319544.."
-    }
+      "timestamp": "16319544..",
+      "balance_raw": "372647920414...",
+      "amount_raw": "1788115000000000000..." // RAW Nano
+  },
+  "metadata": { // All Additional Metadata sent
+    "user_id": "my_meta"
   }
 }
 ```
@@ -145,11 +164,11 @@ $request->header('Webhook-Secret') == config("laravel-nano-to.webhook_secret") /
 // Compare the body, store required info in DB and finally update the order status. In Webhook Controller.
 $request->input('amount') == $order->amount_in_usd;
 $request->input('status') == "complete";
-$request->input('metadata.payment.subtype') == "receive";
+$request->input('block.subtype') == "receive";
 // You can also compare receiver address is in config or not.
 
 $order->via = "nano";
-$order->hash = $request->input('metadata.payment.hash');
+$order->hash = $request->input('block.hash');
 $order->status = "complete";
 $order-save();
 ```
@@ -168,12 +187,12 @@ public function webhook(Request $request, Order $order) {
         if(
             $request->input('amount') == $order->amount_in_usd &&
             $request->input('status') == "complete" &&
-            $request->input('metadata.payment.subtype') == "receive" &&
-            $request->input('metadata.payment.hash')
+            $request->input('block.subtype') == "receive" &&
+            $request->input('block.hash')
         ) {
             $order->status = "complete";
-            $order->hash = $request->input('metadata.payment.hash');
-            $order->remarks = "Payment Complete from Address: " . $request->input('metadata.payment.account') . " , with Amount: " . $request->input('method.amount');
+            $order->hash = $request->input('block.hash');
+            $order->remarks = "Payment Complete from Address: " . $request->input('block.account') . " , with Amount: " . $request->input('method.amount');
             $order->save();
         }
         else {
@@ -182,12 +201,46 @@ public function webhook(Request $request, Order $order) {
         }
     }
 
+    // You can also utilize Metadata for verification:
+    // $request->input('metadata.user_id') == $order->user_id;
+
     $order->save();
 
     return ["success" => true];
 }
 ```
 </details>
+
+<span id="advanced-usage"></span>
+### Advanced Usage (API / Helpers)
+[View details and response here](https://github.com/formsend/nano#advanced-usage-api)
+
+```php
+use Niush\LaravelNanoTo\NanoToApi;
+
+// 1) Get CoinMarketCap conversion rate
+NanoToApi::getPrice("NANO", "USD");
+NanoToApi::getPrice("XMR", "NPR");
+NanoToApi::getPrice("NANO", "XMR");
+
+// 2) Get Nano.to Custom Username alias information
+NanoToApi::getUsername("moon");
+
+// 3) Get Nano Address Information
+NanoToApi::getNanoAddressInfo("nano_3xxxx");
+
+// 4) Get Total Nano Balance from all nano address provided in config file
+NanoToApi::getTotalNanoBalance();
+
+// 5) Get Pending Nano Blocks
+NanoToApi::getPendingNanoBlocks("nano_3xxxx");
+
+// 6) Get Last 20+ Nano Address History
+NanoToApi::getNanoAddressHistory("nano_3xxxx");
+
+// 6) Get Nano Transaction by specific Amount (Amount must be in Nano decimal format)
+NanoToApi::getNanoTransactionByAmount("nano_3xxxx", "2.101");
+```
 
 ### Translation
 Add translation for these messages if required.
