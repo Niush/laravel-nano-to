@@ -5,7 +5,7 @@ namespace Niush\LaravelNanoTo;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Niush\LaravelNanoTo\Skeleton\SkeletonClass
+ * @see Niush\LaravelNanoTo\LaravelNanoTo
  */
 class LaravelNanoToFacade extends Facade
 {

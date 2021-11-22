@@ -87,7 +87,10 @@ return LaravelNanoTo::info("Donate Us")
 // 5) Use RAW friendly Amount in QR Codes (e.g. for Natrium)
 return LaravelNanoTo::asRaw()->amount(9.99)->create($order->id)->send();
 
-// 6) Or Simply, if no need to track anything. And, required routes do not need {id} param.
+// 6) With Custom Image in Checkout page
+return LaravelNanoTo::withImage("full_url_of_image")->amount(9.99)->create($order->id)->send();
+
+// 7) Or Simply, if no need to track anything. And, required routes do not need {id} param.
 return LaravelNanoTo::create();
 
 // Receiving Nano Address will randomly be picked from config file.
@@ -226,7 +229,7 @@ NanoToApi::getPrice("NANO", "XMR");
 // 2) Get Nano.to Custom Username alias information
 NanoToApi::getUsername("moon");
 
-// 3) Get Nano Address Information
+// 3) Get Nano Address Information (OR Nano.to alias info)
 NanoToApi::getNanoAddressInfo("nano_3xxxx");
 
 // 4) Get Total Nano Balance from all nano address provided in config file
@@ -235,11 +238,20 @@ NanoToApi::getTotalNanoBalance();
 // 5) Get Pending Nano Blocks
 NanoToApi::getPendingNanoBlocks("nano_3xxxx");
 
-// 6) Get Last 20+ Nano Address History
+// 6) Get Last 50+ Block History
 NanoToApi::getNanoAddressHistory("nano_3xxxx");
 
-// 6) Get Nano Transaction by specific Amount (Amount must be in Nano decimal format)
+// 7) Get Nano Transaction by specific Amount (Amount must be in Nano decimal format)
 NanoToApi::getNanoTransactionByAmount("nano_3xxxx", "2.101");
+
+// 8) Get Nano Transaction by block HASH
+NanoToApi::getNanoTransactionByHash("NANO_HASH");
+
+// 9) Get JSON Representation of given checkout URL. Only has 12 hour lifespan.
+NanoToApi::getCheckoutUrlAsJson("https://nano.to/checkout/xxx");
+
+// 10) Check if nanocrawler is down or unreachable. Returns boolean true if down.
+NanoToApi::isNanoCrawlerDown();
 ```
 
 ### Translation

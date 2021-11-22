@@ -16,11 +16,14 @@ class LaravelNanoTo
     public $amount;
     public $suggest;
     public $business;
+    public $background;
+    public $color;
     public $checkout_url;
     public $webhook_secret;
     public $symbol = 'nano';
     public $metadata = null;
     public $raw = false;
+    public $image = null;
 
     public function __construct()
     {
@@ -28,6 +31,8 @@ class LaravelNanoTo
         $this->description = config('laravel-nano-to.description');
         $this->webhook_secret = config('laravel-nano-to.webhook_secret');
         $this->business = config('laravel-nano-to.business');
+        $this->background = config('laravel-nano-to.background');
+        $this->color = config('laravel-nano-to.color');
     }
 
     /**
@@ -52,7 +57,7 @@ class LaravelNanoTo
      */
     public function amount($amount)
     {
-        if($amount < 0.1) {
+        if ($amount < 0.1) {
             throw new Error("Minimum allowed amount in USD is 0.1");
         }
         $this->amount = $amount;
@@ -84,6 +89,42 @@ class LaravelNanoTo
     public function business($business)
     {
         $this->business = $business;
+        return $this;
+    }
+
+    /**
+     * Override Background color
+     *
+     * @params string $background
+     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     */
+    public function background($background)
+    {
+        $this->background = $background;
+        return $this;
+    }
+
+    /**
+     * Override Foreground color
+     *
+     * @params string $color
+     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     */
+    public function color($color)
+    {
+        $this->color = $color;
+        return $this;
+    }
+
+    /**
+     * Add Single Image to Checkout page. Provide full url.
+     *
+     * @params string $image_url
+     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     */
+    public function withImage($image_url)
+    {
+        $this->image = $image_url;
         return $this;
     }
 
@@ -131,7 +172,7 @@ class LaravelNanoTo
      */
     public function create($unique_id = null, $callback = null)
     {
-        $accounts = config('laravel-nano-to.accounts.'.$this->symbol, []);
+        $accounts = config('laravel-nano-to.accounts.' . $this->symbol, []);
         $success_url = Route::has(config('laravel-nano-to.success_url'))
         ? route(config('laravel-nano-to.success_url'), $unique_id)
         : config('laravel-nano-to.success_url');
@@ -159,8 +200,8 @@ class LaravelNanoTo
                 "cancel_url" => $cancel_url,
                 "webhook_url" => $webhook_url,
                 "webhook_secret" => $this->webhook_secret,
-                "background" => config('laravel-nano-to.background'),
-                "color" => config('laravel-nano-to.color'),
+                "background" => $this->background,
+                "color" => $this->color,
                 "raw" => $this->raw,
             ];
 
@@ -170,12 +211,16 @@ class LaravelNanoTo
                 $body['plans'] = $this->suggest;
             }
 
-            if($this->business) {
+            if ($this->business) {
                 $body['business'] = $this->business;
             }
 
-            if($this->metadata) {
+            if ($this->metadata) {
                 $body['metadata'] = $this->metadata;
+            }
+
+            if ($this->image) {
+                $body['image'] = $this->image;
             }
 
             try {
@@ -188,7 +233,7 @@ class LaravelNanoTo
                     ], '{"id":"test_id","url":"https://example.com/1","exp":"2021-10-10T01:51:23.853Z"}');
                 } else {
                     $response = $client->post($url, [
-                        'json' => $body
+                        'json' => $body,
                     ]);
                 }
                 // var_dump($response->getBody()->getContents());
@@ -200,8 +245,7 @@ class LaravelNanoTo
                     if ($callback) {
                         if (App::environment() == 'testing') {
                             $callback($this->checkout_url, $body);
-                        }
-                        else {
+                        } else {
                             $callback($this->checkout_url);
                         }
                     } else {
@@ -212,8 +256,8 @@ class LaravelNanoTo
 
                     return $this;
                 }
-            } catch (\Exception $e) {
-                if (App::environment() == 'testing') { dd($e); }
+            } catch (\Exception$e) {
+                if (App::environment() == 'testing') {dd($e);}
                 return $this->throw_checkout_page_not_loaded($e);
             }
         } else {
@@ -237,7 +281,7 @@ class LaravelNanoTo
      */
     public function createWithGetRequest($unique_id = null, $callback = null)
     {
-        $accounts = config('laravel-nano-to.accounts.'.$this->symbol, []);
+        $accounts = config('laravel-nano-to.accounts.' . $this->symbol, []);
         $success_url = Route::has(config('laravel-nano-to.success_url'))
         ? route(config('laravel-nano-to.success_url'), $unique_id)
         : config('laravel-nano-to.success_url');
@@ -265,7 +309,7 @@ class LaravelNanoTo
             '&cancel_url=' . $cancel_url .
             '&webhook_url=' . $webhook_url .
             '&webhook_secret=' . $this->webhook_secret .
-            '&raw=' . ($this->raw ? 'true' : 'false');
+                '&raw=' . ($this->raw ? 'true' : 'false');
 
             if ($this->amount) {
                 $url .= '&price=' . $this->amount;
@@ -287,12 +331,12 @@ class LaravelNanoTo
                         'Content-Type' => 'text/html; charset=utf-8',
                         'X-Guzzle-Redirect-History' => [
                             'https://example.com/1',
-                            'https://example.com/2'
+                            'https://example.com/2',
                         ],
                         'X-Guzzle-Redirect-Status-History' => [
                             "301",
-                            "302"
-                        ]
+                            "302",
+                        ],
                     ]);
                 } else {
                     $response = $client->get($url);
@@ -313,8 +357,8 @@ class LaravelNanoTo
 
                     return $this;
                 }
-            } catch (\Exception $e) {
-                if (App::environment() == 'testing') { dd($e); }
+            } catch (\Exception$e) {
+                if (App::environment() == 'testing') {dd($e);}
                 return $this->throw_checkout_page_not_loaded($e);
             }
         } else {
@@ -336,9 +380,9 @@ class LaravelNanoTo
         return redirect()->to($this->checkout_url);
     }
 
-    public function throw_checkout_page_not_loaded($e=null)
+    public function throw_checkout_page_not_loaded($e = null)
     {
-        if($e) {
+        if ($e) {
             throw $e;
         }
         if (\Lang::has('nano-to.checkout-page-not-loaded')) {

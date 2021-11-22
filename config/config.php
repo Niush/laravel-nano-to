@@ -47,8 +47,8 @@ return [
     /**
      * Basic UI Customization
      */
-    "background" => "#eeeeee",
-    "color" => "#111111",
+    "background" => "#FFFFFF,#1B9CFC",
+    "color" => "black,white",
 
     /**
      * Named Route to Re-direct when Nano payment is successful. e.g. /order/success/{id}
