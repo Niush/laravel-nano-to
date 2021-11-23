@@ -214,12 +214,11 @@ class NanoToApiTest extends TestCase
     {
         if (!$this->use_real_api) {
             $response = (object) [
-                "type" => "state",
-                "balance" => "0.215288",
-                "subtype" => "receive",
-                "account" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                "type" => "receive",
+                "signature" => "E09B7AF936EE4CE248630F4D03407B5BB40E258FC06B841472A30FE4FF423962F5E2201BAB321B39C10C250169D8033EB1600D9D58E39B271B2B58CC7CDB9508",
                 "amount" => "0.02143",
-                "hash" => "94E74C2EDAE153C181858BD28CFB67BA990EC8D1C43427658A118C947121A995",
+                "recipient" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                "confirmed" => "true",
             ];
         } else {
             $response = NanoToApi::getNanoTransactionByHash("94E74C2EDAE153C181858BD28CFB67BA990EC8D1C43427658A118C947121A995");
@@ -229,10 +228,10 @@ class NanoToApiTest extends TestCase
 
         if ($response) {
             if (!isset($response->error)) {
-                $this->assertObjectHasAttribute("balance", $response);
-                $this->assertObjectHasAttribute("hash", $response);
-                $this->assertObjectHasAttribute("account", $response);
+                $this->assertObjectHasAttribute("type", $response);
+                $this->assertObjectHasAttribute("signature", $response);
                 $this->assertObjectHasAttribute("amount", $response);
+                $this->assertObjectHasAttribute("confirmed", $response);
             }
         }
     }
