@@ -4,29 +4,29 @@ namespace Niush\LaravelNanoTo;
 
 use Error;
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
 class LaravelNanoTo
 {
-    public $base_url = 'https://nano.to';
-    public $title = "";
-    public $description = "";
-    public $amount;
-    public $suggest;
-    public $business;
-    public $background;
-    public $color;
-    public $checkout_url;
-    public $webhook_secret;
-    public $symbol = 'nano';
-    public $metadata = null;
-    public $raw = false;
-    public $image = null;
+    protected $base_url;
+    protected $title = "";
+    protected $description = "";
+    protected $amount;
+    protected $suggest;
+    protected $business;
+    protected $background;
+    protected $color;
+    protected $checkout_url;
+    protected $webhook_secret;
+    protected $symbol = 'nano';
+    protected $metadata = null;
+    protected $raw = false;
+    protected $image = null;
 
     public function __construct()
     {
+        $this->base_url = config('laravel-nano-to.base_url', 'https://nano.to');
         $this->title = config('laravel-nano-to.title');
         $this->description = config('laravel-nano-to.description');
         $this->webhook_secret = config('laravel-nano-to.webhook_secret');
@@ -224,18 +224,11 @@ class LaravelNanoTo
             }
 
             try {
-                $client = new Client();
+                $client = app(Client::class);
 
-                // Fake Nano.to response if testing.
-                if (App::environment() == 'testing') {
-                    $response = new Response(200, [
-                        'Content-Type' => 'application/json; charset=utf-8',
-                    ], '{"id":"test_id","url":"https://example.com/1","exp":"2021-10-10T01:51:23.853Z"}');
-                } else {
-                    $response = $client->post($url, [
-                        'json' => $body,
-                    ]);
-                }
+                $response = $client->post($url, [
+                    'json' => $body,
+                ]);
                 // var_dump($response->getBody()->getContents());
                 $this->checkout_url = json_decode($response->getBody()->getContents(), true)["url"];
 
@@ -257,108 +250,6 @@ class LaravelNanoTo
                     return $this;
                 }
             } catch (\Exception$e) {
-                if (App::environment() == 'testing') {dd($e);}
-                return $this->throw_checkout_page_not_loaded($e);
-            }
-        } else {
-            if (\Lang::has('nano-to.no-receiver')) {
-                throw new Error(__("nano-to.no-receiver"));
-            } else {
-                throw new Error("Receiver Account was not available.");
-            }
-        }
-    }
-
-    /**
-     * Get the Nano.to Gateway URL.
-     * Uses GET method (Default and favorable option is POST)
-     *
-     * @deprecated Use create function that uses POST action instead. And, has more features.
-     *
-     * @params integer|string $unique_id
-     * @params function $callback
-     * @return Niush\LaravelNanoTo\LaravelNanoTo || Illuminate\Http\RedirectResponse
-     */
-    public function createWithGetRequest($unique_id = null, $callback = null)
-    {
-        $accounts = config('laravel-nano-to.accounts.' . $this->symbol, []);
-        $success_url = Route::has(config('laravel-nano-to.success_url'))
-        ? route(config('laravel-nano-to.success_url'), $unique_id)
-        : config('laravel-nano-to.success_url');
-
-        $cancel_url = Route::has(config('laravel-nano-to.cancel_url'))
-        ? route(config('laravel-nano-to.cancel_url'), $unique_id)
-        : config('laravel-nano-to.cancel_url');
-
-        $webhook_url = Route::has(config('laravel-nano-to.webhook_url'))
-        ? route(config('laravel-nano-to.webhook_url'), $unique_id)
-        : config('laravel-nano-to.webhook_url');
-
-        // If Local use local_webhook_url from config instead.
-        if (!App::environment(['production', 'prod']) && config('laravel-nano-to.local_webhook_url')) {
-            $webhook_url = config('laravel-nano-to.local_webhook_url');
-        }
-
-        if ($accounts && sizeof($accounts) > 0) {
-            $address = $accounts[array_rand($accounts)];
-            $url = $this->base_url .
-            '/' . $address .
-            '?title=' . $this->title .
-            '&description=' . $this->description .
-            '&success_url=' . $success_url .
-            '&cancel_url=' . $cancel_url .
-            '&webhook_url=' . $webhook_url .
-            '&webhook_secret=' . $this->webhook_secret .
-                '&raw=' . ($this->raw ? 'true' : 'false');
-
-            if ($this->amount) {
-                $url .= '&price=' . $this->amount;
-            } elseif ($this->suggest) {
-                $parameters = array_map(function ($s) {
-                    return $s["name"] . ":" . $s["price"];
-                }, $this->suggest);
-
-                $this->suggest = implode(",", $parameters);
-                $url .= '&suggest=' . $this->suggest;
-            }
-
-            try {
-                $client = new Client(['allow_redirects' => ['track_redirects' => true]]);
-
-                // Fake Nano.to response if testing.
-                if (App::environment() == 'testing') {
-                    $response = new Response(200, [
-                        'Content-Type' => 'text/html; charset=utf-8',
-                        'X-Guzzle-Redirect-History' => [
-                            'https://example.com/1',
-                            'https://example.com/2',
-                        ],
-                        'X-Guzzle-Redirect-Status-History' => [
-                            "301",
-                            "302",
-                        ],
-                    ]);
-                } else {
-                    $response = $client->get($url);
-                }
-                // var_dump($response->getBody()->getContents());
-                $this->checkout_url = last($response->getHeader(\GuzzleHttp\RedirectMiddleware::HISTORY_HEADER));
-
-                if (!$this->checkout_url) {
-                    return $this->throw_checkout_page_not_loaded();
-                } else {
-                    if ($callback) {
-                        $callback($this->checkout_url, $url);
-                    } else {
-                        if (!$unique_id) {
-                            return $this->send();
-                        }
-                    }
-
-                    return $this;
-                }
-            } catch (\Exception$e) {
-                if (App::environment() == 'testing') {dd($e);}
                 return $this->throw_checkout_page_not_loaded($e);
             }
         } else {

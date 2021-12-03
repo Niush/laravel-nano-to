@@ -280,4 +280,16 @@ class NanoToApiTest extends TestCase
 
         $this->assertEquals("boolean", gettype($isDown));
     }
+
+    /** @test */
+    public function nano_to_down_detector_should_work_as_expected()
+    {
+        if (!$this->use_real_api) {
+            $isDown = false;
+        } else {
+            $isDown = NanoToApi::isNanoToDown();
+        }
+
+        $this->assertEquals("boolean", gettype($isDown));
+    }
 }

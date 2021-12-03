@@ -5,6 +5,11 @@
  */
 return [
     /**
+     * Nano.to Base URL of choice (without trailing slash)
+     */
+    'base_url' => "https://nano.to",
+
+    /**
      * Secret Key for Webhook verification
      */
     'webhook_secret' => env('NANO_WEBHOOK_SECRET'),

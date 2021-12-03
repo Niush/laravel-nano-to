@@ -252,6 +252,9 @@ NanoToApi::getCheckoutUrlAsJson("https://nano.to/checkout/xxx");
 
 // 10) Check if nanocrawler is down or unreachable. Returns boolean true if down.
 NanoToApi::isNanoCrawlerDown();
+
+// 11) Check if Nano.to base_url is down or unreachable. Returns boolean true if down.
+NanoToApi::isNanoToDown();
 ```
 
 ### Translation

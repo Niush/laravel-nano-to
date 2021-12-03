@@ -2,13 +2,18 @@
 
 namespace Niush\LaravelNanoTo\Tests\Feature;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Response;
 use Niush\LaravelNanoTo\LaravelNanoToFacade as LaravelNanoTo;
 use Niush\LaravelNanoTo\Tests\TestCase;
 
 class LaravelNanoToTest extends TestCase
 {
     protected $app;
-    protected $testing_checkout_url = "https://example.com/1";
+    protected $testing_checkout_url = "https://example.com/test_id";
+    protected $use_real_api = false;
 
     /**
      * Set up the test
@@ -16,6 +21,15 @@ class LaravelNanoToTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        if (!$this->use_real_api) {
+            $mock = new MockHandler(collect([1, 2])->map(fn() => $this->buildMockResponse())->toArray());
+
+            $handlerStack = HandlerStack::create($mock);
+            $client = new Client(['handler' => $handlerStack]);
+
+            $this->app->instance('GuzzleHttp\Client', $client);
+        }
     }
 
     /**
@@ -30,10 +44,22 @@ class LaravelNanoToTest extends TestCase
         $app['config']->set('app.debug', true);
         $app['config']->set('laravel-nano-to.accounts', [
             'nano' => [
-                'nano_3xxx',
+                'nano_378shkx4k3wd5gxmj3xnjwuxtaf9xrehyz7ugakpiemh8arxq8w9a9xniush',
             ],
         ]);
         $this->app = $app;
+        if (env("USE_REAL_API")) {
+            // $this->use_real_api = true;
+        }
+    }
+
+    public function buildMockResponse()
+    {
+        $response_json = '{"id":"test_id", "url":"' . $this->testing_checkout_url . '", "exp":"2021-10-10T01:51:23.853Z"}';
+        return new Response(
+            200, ['Content-Type' => 'application/json; charset=utf-8'],
+            $response_json
+        );
     }
 
     /** @test */
@@ -53,11 +79,19 @@ class LaravelNanoToTest extends TestCase
     public function redirects_to_checkout_and_create_functions_callback_is_also_equal()
     {
         $response = LaravelNanoTo::amount(9.99)->create('unique_id', function ($checkout_url) {
-            $this->assertEquals($this->testing_checkout_url, $checkout_url);
+            if ($this->use_real_api) {
+                $this->assertStringStartsWith($this->app['config']->get('laravel-nano-to.base_url'), $checkout_url);
+            } else {
+                $this->assertEquals($this->testing_checkout_url, $checkout_url);
+            }
         })->send();
 
         $this->assertEquals(302, $response->status());
-        $this->assertEquals($this->testing_checkout_url, $response->headers->get('location'));
+        if ($this->use_real_api) {
+            $this->assertStringStartsWith($this->app['config']->get('laravel-nano-to.base_url'), $response->headers->get('location'));
+        } else {
+            $this->assertEquals($this->testing_checkout_url, $response->headers->get('location'));
+        }
     }
 
     /** @test */
@@ -205,28 +239,5 @@ class LaravelNanoToTest extends TestCase
         $response = LaravelNanoTo::withImage($image_url)->amount(9.99)->create("unique_id", function ($checkout_url, $body) use ($image_url) {
             $this->assertEquals($body["image"], $image_url);
         })->send();
-    }
-
-    /** @test */
-    public function deprecated_get_function_is_still_working_as_expected()
-    {
-        $nano_to_url = "https://nano.to/nano_3xxx" .
-        "?title=Payment for Subscription" .
-        "&description=<i>Also accepts HTML</i>" .
-        "&success_url=" . route(config('laravel-nano-to.success_url'), 'unique_id') .
-        "&cancel_url=" . route(config('laravel-nano-to.cancel_url'), 'unique_id') .
-        "&webhook_url=" . route(config('laravel-nano-to.webhook_url'), 'unique_id') .
-            "&webhook_secret=" .
-            "&raw=false" .
-            "&suggest=Coffee:10,Meal:50";
-
-        $response = LaravelNanoTo::info("Payment for Subscription", "<i>Also accepts HTML</i>")
-            ->suggest([
-                ["name" => "Coffee", "price" => "10"],
-                ["name" => "Meal", "price" => "50"],
-            ])
-            ->createWithGetRequest('unique_id', function ($checkout_url, $original_url) use ($nano_to_url) {
-                $this->assertEquals($nano_to_url, $original_url);
-            });
     }
 }

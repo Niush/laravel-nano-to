@@ -6,19 +6,27 @@ use GuzzleHttp\Client;
 
 class NanoToApi
 {
-    private static $api_base_url = 'https://api.nano.to';
+    /**
+     * Get Nano.to API Base URL
+     *
+     * @return string
+     */
+    public static function getBaseUrl()
+    {
+        return config('laravel-nano-to.base_url', 'https://nano.to');
+    }
 
     /**
      * Get CoinMarketCap conversion rate
      *
      * @param string $symbol
      * @param string $currency
-     * @return object;
+     * @return object
      */
     public static function getPrice($symbol = "NANO", $currency = "USD")
     {
         $client = new Client();
-        $response = $client->get(self::$api_base_url . '/price?symbol=' . $symbol . '&currency=' . $currency . '&json=true');
+        $response = $client->get(self::getBaseUrl() . '/price?symbol=' . $symbol . '&currency=' . $currency . '&json=true');
         return (object) json_decode($response->getBody()->getContents(), true);
     }
 
@@ -26,12 +34,12 @@ class NanoToApi
      * Get Nano.to Custom Username alias information
      *
      * @param string $username
-     * @return object;
+     * @return object
      */
     public static function getUsername($username)
     {
         $client = new Client();
-        $response = $client->get(self::$api_base_url . '/' . $username . '/username?json=true');
+        $response = $client->get(self::getBaseUrl() . '/' . $username . '/username?json=true');
         return (object) json_decode($response->getBody()->getContents(), true);
     }
 
@@ -39,12 +47,12 @@ class NanoToApi
      * Get Nano Address Information
      *
      * @param string $address
-     * @return object;
+     * @return object
      */
     public static function getNanoAddressInfo($address)
     {
         $client = new Client();
-        $response = $client->get(self::$api_base_url . '/' . $address . '/account?json=true');
+        $response = $client->get(self::getBaseUrl() . '/' . $address . '/account?json=true');
         return (object) json_decode($response->getBody()->getContents(), true);
     }
 
@@ -66,7 +74,7 @@ class NanoToApi
         ];
         $client = new Client();
         foreach ($accounts as $account) {
-            $response = json_decode($client->get(self::$api_base_url . '/' . $account . '/account?json=true')->getBody()->getContents(), true);
+            $response = json_decode($client->get(self::getBaseUrl() . '/' . $account . '/account?json=true')->getBody()->getContents(), true);
             $result['balance'] += $response["balance"] ?? 0;
             $result['pending'] += !empty($response["pending"]) ? $response["pending"] : 0;
             $result['balance_raw'] += $response["balance_raw"] ?? 0;
@@ -84,7 +92,7 @@ class NanoToApi
     public static function getPendingNanoBlocks($address)
     {
         $client = new Client();
-        $response = $client->get(self::$api_base_url . '/' . $address . '/pending?json=true');
+        $response = $client->get(self::getBaseUrl() . '/' . $address . '/pending?json=true');
         return collect(json_decode($response->getBody()->getContents(), true));
     }
 
@@ -97,7 +105,7 @@ class NanoToApi
     public static function getNanoAddressHistory($address)
     {
         $client = new Client();
-        $response = $client->get(self::$api_base_url . '/' . $address . '/history?json=true');
+        $response = $client->get(self::getBaseUrl() . '/' . $address . '/history?json=true');
         return collect(json_decode($response->getBody()->getContents(), true));
     }
 
@@ -112,7 +120,7 @@ class NanoToApi
     public static function getNanoTransactionByAmount($address, $amount)
     {
         $client = new Client();
-        $response = $client->get(self::$api_base_url . '/payment/' . $address . '/' . $amount . '?json=true');
+        $response = $client->get(self::getBaseUrl() . '/payment/' . $address . '/' . $amount . '?json=true');
         try {
             return (object) json_decode($response->getBody()->getContents(), true);
         } catch (Exception $e) {
@@ -129,7 +137,7 @@ class NanoToApi
     public static function getNanoTransactionByHash($hash)
     {
         $client = new Client();
-        $response = $client->get(self::$api_base_url . '/hash/' . $hash . '?json=true');
+        $response = $client->get(self::getBaseUrl() . '/hash/' . $hash . '?json=true');
         try {
             return (object) json_decode($response->getBody()->getContents(), true);
         } catch (Exception $e) {
@@ -168,6 +176,26 @@ class NanoToApi
             $response = $client->get('https://api.nanocrawler.cc/version');
             $res = (object) json_decode($response->getBody()->getContents(), true);
             if ($res->network === "live") {
+                return false;
+            }
+            return true;
+        } catch (Exception $e) {
+            return true;
+        }
+    }
+
+    /**
+     * Check if Nano.to API is down or unreachable.
+     *
+     * @return boolean
+     */
+    public static function isNanoToDown()
+    {
+        $client = new Client();
+        try {
+            $response = $client->get(self::getBaseUrl() . '/status?json=true');
+            $res = (object) json_decode($response->getBody()->getContents(), true);
+            if ($res->status === true) {
                 return false;
             }
             return true;
