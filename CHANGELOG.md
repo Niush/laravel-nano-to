@@ -2,6 +2,13 @@
 
 All notable changes to `laravel-nano-to` will be documented in this file
 
+## 1.0.4 - 2021-12-03
+
+- Use config base_url for choosing nano.to api url
+- Clean Up LaravelNanoTo Facade to not use fake response, instead utilize Guzzle Client Mock in tests
+- Removed Nano.to GET based function & tests
+- isNanoToDown() helper function
+
 ## 1.0.3 - 2021-11-22
 
 - Some Nano.to API route were changed. It has been updated.
