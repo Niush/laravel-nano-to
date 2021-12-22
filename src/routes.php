@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Niush\LaravelNanoTo\Http\Controllers\OrderController;
+use Niush\NanoTo\Http\Controllers\OrderController;
 
 Route::get('/order/success/{id}', [OrderController::class, 'success'])->name('nano-to-success');
 Route::get('/order/cancel/{id}', [OrderController::class, 'cancel'])->name('nano-to-cancel');

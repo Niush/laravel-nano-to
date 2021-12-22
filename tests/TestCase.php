@@ -1,8 +1,8 @@
 <?php
 
-namespace Niush\LaravelNanoTo\Tests;
+namespace Niush\NanoTo\Tests;
 
-use Niush\LaravelNanoTo\LaravelNanoToServiceProvider;
+use Niush\NanoTo\NanoToServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
@@ -15,7 +15,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
     protected function getPackageProviders($app)
     {
         return [
-            LaravelNanoToServiceProvider::class,
+            NanoToServiceProvider::class,
         ];
     }
 

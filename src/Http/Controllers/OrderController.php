@@ -1,6 +1,6 @@
 <?php
 
-namespace Niush\LaravelNanoTo\Http\Controllers;
+namespace Niush\NanoTo\Http\Controllers;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -24,7 +24,7 @@ class OrderController extends Controller
             'status' => 'required',
             'amount' => 'required',
             'method.symbol' => 'required',
-            'metadata.payment.hash' => 'required',
+            'block.hash' => 'required',
         ]);
         if ($validator->fails()) {
             return 'validation failed';

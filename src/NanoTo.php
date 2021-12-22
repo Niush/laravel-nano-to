@@ -1,13 +1,13 @@
 <?php
 
-namespace Niush\LaravelNanoTo;
+namespace Niush\NanoTo;
 
 use Error;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
-class LaravelNanoTo
+class NanoTo
 {
     protected $base_url;
     protected $title = "";
@@ -26,13 +26,13 @@ class LaravelNanoTo
 
     public function __construct()
     {
-        $this->base_url = config('laravel-nano-to.base_url', 'https://nano.to');
-        $this->title = config('laravel-nano-to.title');
-        $this->description = config('laravel-nano-to.description');
-        $this->webhook_secret = config('laravel-nano-to.webhook_secret');
-        $this->business = config('laravel-nano-to.business');
-        $this->background = config('laravel-nano-to.background');
-        $this->color = config('laravel-nano-to.color');
+        $this->base_url = config('nano-to.base_url', 'https://nano.to');
+        $this->title = config('nano-to.title');
+        $this->description = config('nano-to.description');
+        $this->webhook_secret = config('nano-to.webhook_secret');
+        $this->business = config('nano-to.business');
+        $this->background = config('nano-to.background');
+        $this->color = config('nano-to.color');
     }
 
     /**
@@ -40,7 +40,7 @@ class LaravelNanoTo
      *
      * @params string $title
      * @params string $description
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function info($title = null, $description = null)
     {
@@ -53,7 +53,7 @@ class LaravelNanoTo
      * Sets the amount in USD. Will Override suggest if also provided.
      *
      * @params string $amount
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function amount($amount)
     {
@@ -70,7 +70,7 @@ class LaravelNanoTo
      * [ ["name" => "Coffee", "price" => "10"], ["name" => "Meal", "price" => "50"] ]
      *
      * @params array $suggest
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function suggest($suggest)
     {
@@ -84,7 +84,7 @@ class LaravelNanoTo
      * ["name"=>"Company Name", "logo"=>"https://logo.png", "favicon"=>"https://logo.ico"]
      *
      * @params array $business
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function business($business)
     {
@@ -96,7 +96,7 @@ class LaravelNanoTo
      * Override Background color
      *
      * @params string $background
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function background($background)
     {
@@ -108,7 +108,7 @@ class LaravelNanoTo
      * Override Foreground color
      *
      * @params string $color
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function color($color)
     {
@@ -120,7 +120,7 @@ class LaravelNanoTo
      * Add Single Image to Checkout page. Provide full url.
      *
      * @params string $image_url
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function withImage($image_url)
     {
@@ -132,7 +132,7 @@ class LaravelNanoTo
      * Use Custom Webhook Secret
      *
      * @params string $secret
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function secret($secret)
     {
@@ -144,7 +144,7 @@ class LaravelNanoTo
      * Set the additional Metadata in request body
      *
      * @params array $metadata
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function metadata($metadata)
     {
@@ -155,7 +155,7 @@ class LaravelNanoTo
     /**
      * Generate RAW friendly QR Codes (e.g. for Natrium)
      *
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Niush\NanoTo\NanoTo
      */
     public function asRaw()
     {
@@ -168,26 +168,26 @@ class LaravelNanoTo
      *
      * @params integer|string $unique_id
      * @params function $callback
-     * @return Niush\LaravelNanoTo\LaravelNanoTo || Illuminate\Http\RedirectResponse
+     * @return Niush\NanoTo\NanoTo || Illuminate\Http\RedirectResponse
      */
     public function create($unique_id = null, $callback = null)
     {
-        $accounts = config('laravel-nano-to.accounts.' . $this->symbol, []);
-        $success_url = Route::has(config('laravel-nano-to.success_url'))
-        ? route(config('laravel-nano-to.success_url'), $unique_id)
-        : config('laravel-nano-to.success_url');
+        $accounts = config('nano-to.accounts.' . $this->symbol, []);
+        $success_url = Route::has(config('nano-to.success_url'))
+        ? route(config('nano-to.success_url'), $unique_id)
+        : config('nano-to.success_url');
 
-        $cancel_url = Route::has(config('laravel-nano-to.cancel_url'))
-        ? route(config('laravel-nano-to.cancel_url'), $unique_id)
-        : config('laravel-nano-to.cancel_url');
+        $cancel_url = Route::has(config('nano-to.cancel_url'))
+        ? route(config('nano-to.cancel_url'), $unique_id)
+        : config('nano-to.cancel_url');
 
-        $webhook_url = Route::has(config('laravel-nano-to.webhook_url'))
-        ? route(config('laravel-nano-to.webhook_url'), $unique_id)
-        : config('laravel-nano-to.webhook_url');
+        $webhook_url = Route::has(config('nano-to.webhook_url'))
+        ? route(config('nano-to.webhook_url'), $unique_id)
+        : config('nano-to.webhook_url');
 
         // If Local use local_webhook_url from config instead.
-        if (!App::environment(['production', 'prod']) && config('laravel-nano-to.local_webhook_url')) {
-            $webhook_url = config('laravel-nano-to.local_webhook_url');
+        if (!App::environment(['production', 'prod']) && config('nano-to.local_webhook_url')) {
+            $webhook_url = config('nano-to.local_webhook_url');
         }
 
         if ($accounts && sizeof($accounts) > 0) {
@@ -264,7 +264,7 @@ class LaravelNanoTo
     /**
      * Redirect to Nano.to checkout URL
      *
-     * @return Niush\LaravelNanoTo\LaravelNanoTo
+     * @return Illuminate\Http\RedirectResponse
      */
     public function send()
     {

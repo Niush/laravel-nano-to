@@ -1,9 +1,8 @@
 <?php
 
-namespace Niush\LaravelNanoTo\Tests\Feature;
+namespace Niush\NanoTo\Tests\Feature;
 
-use Niush\LaravelNanoTo\Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Niush\NanoTo\Tests\TestCase;
 
 class NamedRouteTest extends TestCase
 {
@@ -20,7 +19,7 @@ class NamedRouteTest extends TestCase
     }
 
     /** @test */
-    function success_page_is_accesible_from_named_route()
+    function success_page_is_accessible_from_named_route()
     {
         $this->get(route('nano-to-success', 'some-id'))
             ->assertSee('ok -');
@@ -34,7 +33,7 @@ class NamedRouteTest extends TestCase
     }
 
     /** @test */
-    function webhook_page_is_accesible_from_named_route()
+    function webhook_page_is_accessible_from_named_route()
     {
         $this->post(route('nano-to-webhook', 'some-id'))
             ->assertSee('validation failed');
@@ -46,11 +45,10 @@ class NamedRouteTest extends TestCase
             "method" => [
                 "symbol" => "nano"
             ],
-            "metadata" => [
-                "payment" => [
-                    "hash" => "ABCD"
-                ]
-            ],
+            "block" => [
+                "type" => "receive",
+                "hash" => "ABCD",
+            ]
         ])
         ->assertSee('webhook -');
     }

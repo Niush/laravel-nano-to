@@ -1,9 +1,8 @@
 <?php
 
-namespace Niush\LaravelNanoTo;
+namespace Niush\NanoTo;
 
 use GuzzleHttp\Client;
-use Illuminate\Support\Str;
 
 class NanoToApi
 {
@@ -14,7 +13,7 @@ class NanoToApi
      */
     public static function getBaseUrl()
     {
-        return config('laravel-nano-to.base_url', 'https://nano.to');
+        return config('nano-to.base_url', 'https://nano.to');
     }
 
     /**
@@ -66,7 +65,7 @@ class NanoToApi
      */
     public static function getTotalNanoBalance()
     {
-        $accounts = config('laravel-nano-to.accounts.nano', []);
+        $accounts = config('nano-to.accounts.nano', []);
         $result = [
             "balance" => 0,
             "pending" => 0,

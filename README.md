@@ -17,10 +17,10 @@ composer require niush/laravel-nano-to
 
 Then publish the config file using artisan.
 ```bash
-php artisan vendor:publish --provider="Niush\LaravelNanoTo\LaravelNanoToServiceProvider"
+php artisan vendor:publish --provider="Niush\NanoTo\NanoToServiceProvider"
 ```
 
-Update config file (``config/laravel-nano-to.php``) with your desired settings. Use ``env`` where ever required.
+Update config file (``config/nano-to.php``) with your desired settings. Use ``env`` where ever required.
 
 ## Configuration
 Add Nano Webhook Secret in your env file. Make sure it is difficult to guess with random string. **DO NOT USE SAME AS APP_ENV**.
@@ -60,24 +60,24 @@ For initiating Payment process:
 
 ```php
 // 1) With Specific Amount
-return LaravelNanoTo::amount(10)->create($order->id, function($checkout_url) {
+return NanoTo::amount(10)->create($order->id, function($checkout_url) {
     // Do Something with $checkout_url if required.
     // For SPA send link as JSON response etc.
 })->send();
 
 // 2) With Custom Info (Else uses title and description from config)
-return LaravelNanoTo::info("Payment for Subscription", "<i>Also accepts HTML</i>")
+return NanoTo::info("Payment for Subscription", "<i>Also accepts HTML</i>")
 ->amount(9.99)
 ->create($order->id)->send();
 
 // 3) With Additional Metadata (Can be received in Webhook)
-return LaravelNanoTo::amount(9.99)->metadata([
+return NanoTo::amount(9.99)->metadata([
     "user_id" => $user->id,
     "order_id" => $order->id
 ])->create($order->id)->send();
 
 // 4) For Suggest based payment. Useful in cases like Donation.
-return LaravelNanoTo::info("Donate Us")
+return NanoTo::info("Donate Us")
 ->suggest([
     ["name" => "Coffee", "price" => "10"],
     ["name" => "Meal", "price" => "50"] 
@@ -85,13 +85,13 @@ return LaravelNanoTo::info("Donate Us")
 ->create($uuid)->send();
 
 // 5) Use RAW friendly Amount in QR Codes (e.g. for Natrium)
-return LaravelNanoTo::asRaw()->amount(9.99)->create($order->id)->send();
+return NanoTo::asRaw()->amount(9.99)->create($order->id)->send();
 
 // 6) With Custom Image in Checkout page
-return LaravelNanoTo::withImage("full_url_of_image")->amount(9.99)->create($order->id)->send();
+return NanoTo::withImage("full_url_of_image")->amount(9.99)->create($order->id)->send();
 
 // 7) Or Simply, if no need to track anything. And, required routes do not need {id} param.
-return LaravelNanoTo::create();
+return NanoTo::create();
 
 // Receiving Nano Address will randomly be picked from config file.
 // The first parameter of create (e.g. $order->id) will be used as params in named routes. 
@@ -99,8 +99,8 @@ return LaravelNanoTo::create();
 
 **You might want to use custom Webhook Secret. So that, it is always different for each checkout. So, instead of using same environment variable. You can do:**
 ```php
-return LaravelNanoTo::amount(10)->secret(
-    config("laravel-nano-to.webhook_secret") . $order->secret_id . $user->id
+return NanoTo::amount(10)->secret(
+    config("nano-to.webhook_secret") . $order->secret_id . $user->id
 )->create($order->id)->send();
 ```
 
@@ -118,7 +118,7 @@ return LaravelNanoTo::amount(10)->secret(
 ```
 ```php
 // You can get the Header and compare with your config secret. In Webhook Controller:
-$request->header('Webhook-Secret') == config("laravel-nano-to.webhook_secret") // Valid
+$request->header('Webhook-Secret') == config("nano-to.webhook_secret") // Valid
 ```
 
 ```js
@@ -141,22 +141,21 @@ $request->header('Webhook-Secret') == config("laravel-nano-to.webhook_secret") /
     "name": "Meal"
   },
   "block": { // Block Information
-      "type": "state",
+      "type": "receive", // You must be receiving :)
       "representative": "nano_3chart...",
-      "link": "391D8B81DB...",
       "balance": "3.726479",
       "previous": "1922BFA40E86C....",
-      "subtype": "receive", // You must be receiving :)
       "account": "nano_36qn7ydq...", // Sender Address
       "amount": "1.788115", // Nano Received
-      "local_timestamp": "1631954...",
       "height": "37",
       "hash": "9829B0306E5269A9A0...", // Transaction Identifier (Most important piece to store.)
       "work": "210862fa...",
-      "signature": "CC16D6519C1113767EA36..",
       "timestamp": "16319544..",
-      "balance_raw": "372647920414...",
       "amount_raw": "1788115000000000000..." // RAW Nano
+      "balance_raw": "372647920414...",
+      "from": "nano_36qn7ydq..."
+      "to": "nano_3gxhq..."
+      "message": ""
   },
   "metadata": { // All Additional Metadata sent
     "user_id": "my_meta"
@@ -167,7 +166,7 @@ $request->header('Webhook-Secret') == config("laravel-nano-to.webhook_secret") /
 // Compare the body, store required info in DB and finally update the order status. In Webhook Controller.
 $request->input('amount') == $order->amount_in_usd;
 $request->input('status') == "complete";
-$request->input('block.subtype') == "receive";
+$request->input('block.type') == "receive";
 // You can also compare receiver address is in config or not.
 
 $order->via = "nano";
@@ -182,7 +181,7 @@ $order-save();
   
 ```php
 public function webhook(Request $request, Order $order) {
-    if($request->header('Webhook-Secret') != config("laravel-nano-to.webhook_secret")) {
+    if($request->header('Webhook-Secret') != config("nano-to.webhook_secret")) {
         $order->status = "failed"; // Webhook Secret is MALFORMED
         $order->remarks = "Payment Verification Malformed";
     }
@@ -190,7 +189,7 @@ public function webhook(Request $request, Order $order) {
         if(
             $request->input('amount') == $order->amount_in_usd &&
             $request->input('status') == "complete" &&
-            $request->input('block.subtype') == "receive" &&
+            $request->input('block.type') == "receive" &&
             $request->input('block.hash')
         ) {
             $order->status = "complete";
@@ -219,7 +218,7 @@ public function webhook(Request $request, Order $order) {
 [View details and response here](https://docs.nano.to/guide/developer-api)
 
 ```php
-use Niush\LaravelNanoTo\NanoToApi;
+use Niush\NanoTo\NanoToApi;
 
 // 1) Get CoinMarketCap conversion rate
 NanoToApi::getPrice("NANO", "USD");

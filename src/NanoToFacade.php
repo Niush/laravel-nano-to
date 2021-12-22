@@ -1,13 +1,13 @@
 <?php
 
-namespace Niush\LaravelNanoTo;
+namespace Niush\NanoTo;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see Niush\LaravelNanoTo\LaravelNanoTo
+ * @see Niush\NanoTo\NanoTo
  */
-class LaravelNanoToFacade extends Facade
+class NanoToFacade extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -16,6 +16,6 @@ class LaravelNanoToFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'laravel-nano-to';
+        return 'nano-to';
     }
 }

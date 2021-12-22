@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-nano-to` will be documented in this file
 
+## 1.1.0 - 2021-12-22
+
+- Update includes breaking changes, but easily fixable.
+- Change Facade name from 'LaravelNanoTo' to 'NanoTo' for simplicity.
+- Change Namespace from 'LaravelNanoTo' to 'NanoTo' for simplicity. Package name stays same.
+- Renamed config file from 'laravel-nano-to' to 'nano-to' for simplicity.
+- Updated Service Provider, Tests and Documentation accordingly.
+
 ## 1.0.5 - 2021-12-22
 
 - Nano.to API to get Public Representatives

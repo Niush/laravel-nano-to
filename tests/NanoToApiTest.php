@@ -1,10 +1,10 @@
 <?php
 
-namespace Niush\LaravelNanoTo\Tests\Feature;
+namespace Niush\NanoTo\Tests\Feature;
 
 use Illuminate\Support\Collection;
-use Niush\LaravelNanoTo\NanoToApi;
-use Niush\LaravelNanoTo\Tests\TestCase;
+use Niush\NanoTo\NanoToApi;
+use Niush\NanoTo\Tests\TestCase;
 
 class NanoToApiTest extends TestCase
 {
@@ -29,7 +29,7 @@ class NanoToApiTest extends TestCase
     {
         $app['config']->set('app.env', 'local');
         $app['config']->set('app.debug', true);
-        $app['config']->set('laravel-nano-to.accounts', [
+        $app['config']->set('nano-to.accounts', [
             'nano' => [
                 'nano_3xxx',
             ],
@@ -118,7 +118,7 @@ class NanoToApiTest extends TestCase
                 "usd_value" => "19.45",
             ];
         } else {
-            $this->app['config']->set('laravel-nano-to.accounts', [
+            $this->app['config']->set('nano-to.accounts', [
                 'nano' => [
                     'nano_378shkx4k3wd5gxmj3xnjwuxtaf9xrehyz7ugakpiemh8arxq8w9a9xniush',
                 ],

@@ -1,10 +1,10 @@
 <?php
 
-namespace Niush\LaravelNanoTo;
+namespace Niush\NanoTo;
 
 use Illuminate\Support\ServiceProvider;
 
-class LaravelNanoToServiceProvider extends ServiceProvider
+class NanoToServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
@@ -15,12 +15,12 @@ class LaravelNanoToServiceProvider extends ServiceProvider
 
         if (class_exists(\Illuminate\Foundation\AliasLoader::class)) {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias('LaravelNanoTo', 'Niush\LaravelNanoTo\LaravelNanoToFacade');
+            $loader->alias('NanoTo', 'Niush\NanoTo\NanoToFacade');
         }
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('laravel-nano-to.php'),
+                __DIR__.'/../config/config.php' => config_path('nano-to.php'),
             ], 'config');
 
             // Registering package commands.
@@ -34,11 +34,11 @@ class LaravelNanoToServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'laravel-nano-to');
+        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'nano-to');
 
         // Register the main class to use with the facade
-        $this->app->singleton('laravel-nano-to', function () {
-            return new LaravelNanoTo;
+        $this->app->singleton('nano-to', function () {
+            return new NanoTo;
         });
     }
 }

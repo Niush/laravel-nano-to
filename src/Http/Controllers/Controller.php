@@ -1,6 +1,6 @@
 <?php
 
-namespace Niush\LaravelNanoTo\Http\Controllers;
+namespace Niush\NanoTo\Http\Controllers;
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;

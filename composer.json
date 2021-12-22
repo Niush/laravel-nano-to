@@ -2,8 +2,9 @@
     "name": "niush/laravel-nano-to",
     "description": "Nano.to Payment Gateway in Laravel",
     "keywords": [
-        "niush",
         "nano.to",
+        "nano-currency",
+        "xno",
         "laravel-nano-to"
     ],
     "homepage": "https://github.com/niush/laravel-nano-to",
@@ -26,18 +27,17 @@
     },
     "autoload": {
         "psr-4": {
-            "Niush\\LaravelNanoTo\\": "src"
+            "Niush\\NanoTo\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Niush\\LaravelNanoTo\\Tests\\": "tests"
+            "Niush\\NanoTo\\Tests\\": "tests"
         }
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
         "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
-
     },
     "config": {
         "sort-packages": true
@@ -45,10 +45,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Niush\\LaravelNanoTo\\LaravelNanoToServiceProvider"
+                "Niush\\NanoTo\\NanoToServiceProvider"
             ],
             "aliases": {
-                "LaravelNanoTo": "Niush\\LaravelNanoTo\\LaravelNanoToFacade"
+                "NanoTo": "Niush\\NanoTo\\NanoToFacade"
             }
         }
     },
