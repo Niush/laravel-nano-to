@@ -270,6 +270,75 @@ class NanoToApiTest extends TestCase
     }
 
     /** @test */
+    public function can_get_list_of_public_representatives()
+    {
+        if (!$this->use_real_api) {
+            $response = collect([
+                [
+                    "username" => "My Nano Ninja",
+                    "rep_address" => "nano_1ninja7rh37ehfp9utkor5ixmxyg8kme8fnzc4zty145ibch8kf5jwpnzr3r",
+                    "est_payment" => "0.000150",
+                    "donation_address" => "nano_1ninja7rh37ehfp9utkor5ixmxyg8kme8fnzc4zty145ibch8kf5jwpnzr3r",
+                    "weight" => 4.89,
+                    "delegators" => 41774,
+                    "uptime" => "good",
+                    "synced" => 100,
+                    "website" => "https://mynano.ninja",
+                    "latitude" => 39.9458,
+                    "longitude" => -74.9042,
+                ],
+            ]);
+        } else {
+            $response = NanoToApi::getListOfPublicRepresentatives("ninja");
+        }
+
+        $this->assertTrue($response instanceof Collection);
+        if (sizeof($response) > 0) {
+            $this->assertArrayHasKey("username", $response->first());
+            $this->assertArrayHasKey("rep_address", $response->first());
+            $this->assertArrayHasKey("weight", $response->first());
+            $this->assertArrayHasKey("delegators", $response->first());
+
+            $this->assertContains("My Nano Ninja", $response->where("username", "My Nano Ninja")->first());
+        }
+    }
+
+    /** @test */
+    public function can_get_list_of_nano_usernames()
+    {
+        if (!$this->use_real_api) {
+            $response = collect([
+                [
+                    "name" => "moon",
+                    "address" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                    "expires" => "September 16, 2030"
+                ],
+                [
+                    "name" => "alberto",
+                    "address" => "nano_3qr5jjnoqnk9fidfqxe7kewzawpx4yytrydkxonmso4jghzispgkszp8awp7",
+                    "expires" => "October 16, 2031"
+                ],
+                [
+                    "name" => "esteban",
+                    "address" => "nano_1m747htgqw5fbhuafuswpwuc18y7zjwqntbi1fynehmz1zaqoj1puj7h96oj",
+                    "expires" => "September 28, 2099"
+                ]
+            ]);
+        } else {
+            $response = NanoToApi::getListOfNanoUsernames("esteban");
+        }
+
+        $this->assertTrue($response instanceof Collection);
+        if (sizeof($response) > 0) {
+            $this->assertArrayHasKey("name", $response->first());
+            $this->assertArrayHasKey("address", $response->first());
+            $this->assertArrayHasKey("expires", $response->first());
+
+            $this->assertContains("esteban", $response->where("name", "esteban")->first());
+        }
+    }
+
+    /** @test */
     public function nano_crawler_down_detector_should_work_as_expected()
     {
         if (!$this->use_real_api) {

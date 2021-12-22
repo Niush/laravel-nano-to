@@ -3,6 +3,7 @@
 namespace Niush\LaravelNanoTo;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Str;
 
 class NanoToApi
 {
@@ -161,6 +162,56 @@ class NanoToApi
             return (object) json_decode($response->getBody()->getContents(), true);
         } catch (Exception $e) {
             return (object) ["error" => "Checkout not found or expired."];
+        }
+    }
+
+    /**
+     * Get List Of Public Representatives for Nano
+     *
+     * @param string $search
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getListOfPublicRepresentatives($search = null)
+    {
+        $client = new Client();
+        $response = $client->get(self::getBaseUrl() . '/reps?json=true');
+        $reps = collect(json_decode($response->getBody()->getContents(), true)['representatives'] ?? []);
+
+        if (!$search) {
+            return $reps;
+        } else {
+            return $reps->filter(function ($rep) use ($search) {
+                return (
+                    stripos($rep['username'], $search) !== false
+                    || stripos($rep['rep_address'], $search) !== false
+                    || stripos($rep['website'], $search) !== false
+                );
+            });
+        }
+    }
+
+    /**
+     * Get List Of Nano.to known Usernames
+     *
+     * @param string $search
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getListOfNanoUsernames($search = null)
+    {
+        $client = new Client();
+        $response = $client->get(self::getBaseUrl() . '/known?json=true');
+        $users = collect(json_decode($response->getBody()->getContents(), true) ?? []);
+
+        if (!$search) {
+            return $users;
+        } else {
+            return $users->filter(function ($user) use ($search) {
+                return (
+                    stripos($user['name'], $search) !== false
+                    || stripos($user['address'], $search) !== false
+                    || stripos($user['expires'], $search) !== false
+                );
+            });
         }
     }
 

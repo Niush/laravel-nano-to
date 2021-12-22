@@ -2,6 +2,11 @@
 
 All notable changes to `laravel-nano-to` will be documented in this file
 
+## 1.0.5 - 2021-12-22
+
+- Nano.to API to get Public Representatives
+- Nano.to API to get all known Usernames
+
 ## 1.0.4 - 2021-12-03
 
 - Use config base_url for choosing nano.to api url

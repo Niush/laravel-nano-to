@@ -216,7 +216,7 @@ public function webhook(Request $request, Order $order) {
 
 <span id="advanced-usage"></span>
 ### Advanced Usage (API / Helpers)
-[View details and response here](https://github.com/formsend/nano#advanced-usage-api)
+[View details and response here](https://docs.nano.to/guide/developer-api)
 
 ```php
 use Niush\LaravelNanoTo\NanoToApi;
@@ -250,10 +250,16 @@ NanoToApi::getNanoTransactionByHash("NANO_HASH");
 // 9) Get JSON Representation of given checkout URL. Only has 12 hour lifespan.
 NanoToApi::getCheckoutUrlAsJson("https://nano.to/checkout/xxx");
 
-// 10) Check if nanocrawler is down or unreachable. Returns boolean true if down.
+// 10) Get List Of Public Representatives for Nano. And, Search by first parameter.
+NanoToApi::getListOfPublicRepresentatives("ninja");
+
+// 11) Get List Of Nano.to known Usernames. And, Search by first parameter.
+NanoToApi::getListOfNanoUsernames("esteban");
+
+// 12) Check if nanocrawler is down or unreachable. Returns boolean true if down.
 NanoToApi::isNanoCrawlerDown();
 
-// 11) Check if Nano.to base_url is down or unreachable. Returns boolean true if down.
+// 13) Check if Nano.to base_url is down or unreachable. Returns boolean true if down.
 NanoToApi::isNanoToDown();
 ```
 
