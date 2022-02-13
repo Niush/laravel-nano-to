@@ -215,9 +215,9 @@ class NanoToApiTest extends TestCase
         if (!$this->use_real_api) {
             $response = (object) [
                 "type" => "receive",
-                "signature" => "E09B7AF936EE4CE248630F4D03407B5BB40E258FC06B841472A30FE4FF423962F5E2201BAB321B39C10C250169D8033EB1600D9D58E39B271B2B58CC7CDB9508",
                 "amount" => "0.02143",
-                "recipient" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                "sender" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                "recipient" => "nano_3tu8f7jou49pt9u448ck81fc7r7gd6gsdutheewoxqhaibxcceiqegoefx4h",
                 "confirmed" => "true",
             ];
         } else {
@@ -229,8 +229,9 @@ class NanoToApiTest extends TestCase
         if ($response) {
             if (!isset($response->error)) {
                 $this->assertObjectHasAttribute("type", $response);
-                $this->assertObjectHasAttribute("signature", $response);
                 $this->assertObjectHasAttribute("amount", $response);
+                $this->assertObjectHasAttribute("sender", $response);
+                $this->assertObjectHasAttribute("recipient", $response);
                 $this->assertObjectHasAttribute("confirmed", $response);
             }
         }

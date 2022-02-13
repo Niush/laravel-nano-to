@@ -21,8 +21,9 @@ return [
     'currencies' => ["nano"],
 
     /**
-     * Address that receives certain currencies.
-     * One of these is chosen randomly per symbol used.
+     * Addresses that receive certain currencies. One of these is chosen randomly per symbol used.
+     * You can also use comma separated environment variable like this:
+     * 'nano' => array_map('trim', explode(',', env('NANO_ACCOUNTS')))
      */
     'accounts' => [
         'nano' => [
