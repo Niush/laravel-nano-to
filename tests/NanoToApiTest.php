@@ -300,7 +300,7 @@ class NanoToApiTest extends TestCase
             $this->assertArrayHasKey("weight", $response->first());
             $this->assertArrayHasKey("delegators", $response->first());
 
-            $this->assertContains("My Nano Ninja", $response->where("username", "My Nano Ninja")->first());
+            $this->assertEquals("My Nano Ninja", $response->where("username", "My Nano Ninja")->first()['username']);
         }
     }
 
@@ -335,7 +335,7 @@ class NanoToApiTest extends TestCase
             $this->assertArrayHasKey("address", $response->first());
             $this->assertArrayHasKey("expires", $response->first());
 
-            $this->assertContains("esteban", $response->where("name", "esteban")->first());
+            $this->assertEquals("esteban", $response->where("name", "esteban")->first()['name']);
         }
     }
 

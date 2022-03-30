@@ -49,7 +49,7 @@ class NanoToTest extends TestCase
         ]);
         $this->app = $app;
         if (env("USE_REAL_API")) {
-            // $this->use_real_api = true;
+            $this->use_real_api = true;
         }
     }
 

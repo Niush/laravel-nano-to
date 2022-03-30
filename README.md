@@ -269,7 +269,7 @@ Add translation for these messages if required.
 
 
 ### Testing
-In Progress. Contributions are welcome.
+Contributions are welcome.
 ```bash
 composer test
 ```

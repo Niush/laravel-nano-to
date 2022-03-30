@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-nano-to` will be documented in this file
 
+## 1.1.2 - 2022-03-30
+
+- Dependencies Update & Fixes
+
 ## 1.1.1 - 2022-02-13
 
 - Laravel 9 Support
