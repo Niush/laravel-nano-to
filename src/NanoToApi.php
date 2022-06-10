@@ -105,7 +105,8 @@ class NanoToApi
     public static function getNanoAddressHistory($address)
     {
         $client = new Client();
-        $response = $client->get(self::getBaseUrl() . '/' . $address . '/history?json=true');
+        // $response = $client->get(self::getBaseUrl() . '/' . $address . '/history?json=true');
+        $response = $client->get(self::getBaseUrl() . '/' . $address . '/history'); // Note: with ?json=true returns empty
         return collect(json_decode($response->getBody()->getContents(), true));
     }
 

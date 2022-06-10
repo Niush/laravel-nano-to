@@ -54,7 +54,7 @@ By default the config accepts named route for webhook and success page. If you w
 As, you have full control, it can easily be implemented via APIs also.
 
 ## Usage
-**NOTE: Amount is always in USD Currency.** (You can use rough USDT to Fiat conversion [helper function](#advanced-usage))
+**NOTE: Amount is always in USD Currency.**
 
 For initiating Payment process: 
 

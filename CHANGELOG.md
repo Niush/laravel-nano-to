@@ -2,6 +2,11 @@
 
 All notable changes to `laravel-nano-to` will be documented in this file
 
+## 1.1.3 - 2022-06-10
+
+- Dependencies Update
+- Fixed Tests due to updated real APIs in Nano.to
+
 ## 1.1.2 - 2022-03-30
 
 - Dependencies Update & Fixes

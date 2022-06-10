@@ -44,7 +44,13 @@ class NanoToApiTest extends TestCase
     public function can_get_price_of_crypto_currency()
     {
         if (!$this->use_real_api) {
-            $response = (object) ["symbol" => "NANO", "price" => 5.233, "currency" => "USD", "timestamp" => "2021-09-23T01:57:52.020Z"];
+            $response = (object) [
+                "symbol" => "NANO",
+                "price" => 1.16,
+                "currency" => "USD",
+                "timestamp" => "June 10, 2022 6:36 AM",
+                "timestamp_unix" => 1654842968
+            ];
         } else {
             $response = NanoToApi::getPrice();
         }
@@ -83,17 +89,15 @@ class NanoToApiTest extends TestCase
         if (!$this->use_real_api) {
             $response = (object) [
                 "balance" => "3.726745204144926111560083887031",
-                "block_count" => "100",
-                "account_version" => "2",
-                "confirmation_height" => "100",
+                "frontier" => "A42CCCxxxx",
                 "representative" => "nano_3chxxx",
-                "weight" => "0",
+                "height" => "100",
                 "pending" => "0",
-                "balance_raw" => "3726745204144926111560083887031",
-                "pending_raw" => "0",
+                "address" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
                 "usd_rate" => "5.22",
                 "usd_value" => "19.45",
-                "address" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                "href" => "nano:nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                "qrcode" => "data:image/png;base64,iVBORxxxx",
             ];
         } else {
             $response = NanoToApi::getNanoAddressInfo("nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o");
@@ -137,12 +141,12 @@ class NanoToApiTest extends TestCase
         if (!$this->use_real_api) {
             $response = collect([
                 [
-                    "type" => "pending",
+                    "type" => "receive",
+                    "from" => "nano_19o64g3cy484nwfen76tfzz94icr1wn9bccw3ruefaham6x5hggpf6pz185x",
                     "amount" => "0.02112",
                     "hash" => "844FFE6D39D1F28673198E7C35A61C960148520FCBB8E2B2B0855C72D033FBF4",
-                    "source" => "nano_19o64g3cy484nwfen76tfzz94icr1wn9bccw3ruefaham6x5hggpf6pz185x",
-                    "timestamp" => null,
                     "amount_raw" => "21120000000000000000000000000",
+                    "timestamp" => null,
                 ],
             ]);
         } else {
@@ -153,6 +157,7 @@ class NanoToApiTest extends TestCase
         if (sizeof($response) > 0) {
             $this->assertArrayHasKey("amount", $response[0]);
             $this->assertArrayHasKey("hash", $response[0]);
+            $this->assertArrayHasKey("from", $response[0]);
         }
     }
 
@@ -162,11 +167,15 @@ class NanoToApiTest extends TestCase
         if (!$this->use_real_api) {
             $response = collect([
                 [
-                    "type" => "state",
-                    "balance" => "0.215288",
-                    "subtype" => "receive",
+                    "type" => "receive",
                     "account" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                    "amount" => "0.02143",
+                    "height" => "244",
                     "hash" => "94E74C2EDAE153C181858BD28CFB67BA990EC8D1C43427658A118C947121A995",
+                    "confirmed" => "true",
+                    "amount_raw" => "21430000000000000000000000000",
+                    "from" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                    "to" => "nano_3w64nbbzttyj8xqkibdc3wt4shczy8jtj365d76948hc45p1fmrbk1racy5a",
                 ],
             ]);
         } else {
@@ -175,9 +184,11 @@ class NanoToApiTest extends TestCase
 
         $this->assertTrue($response instanceof Collection);
         if (sizeof($response) > 0) {
-            $this->assertArrayHasKey("balance", $response[0]);
-            $this->assertArrayHasKey("hash", $response[0]);
+            $this->assertArrayHasKey("type", $response[0]);
             $this->assertArrayHasKey("account", $response[0]);
+            $this->assertArrayHasKey("amount", $response[0]);
+            $this->assertArrayHasKey("hash", $response[0]);
+            $this->assertArrayHasKey("confirmed", $response[0]);
         }
     }
 
@@ -186,12 +197,16 @@ class NanoToApiTest extends TestCase
     {
         if (!$this->use_real_api) {
             $response = (object) [
-                "type" => "state",
-                "balance" => "0.215288",
-                "subtype" => "receive",
-                "account" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
-                "amount" => "0.02143",
-                "hash" => "94E74C2EDAE153C181858BD28CFB67BA990EC8D1C43427658A118C947121A995",
+                "type" => "send",
+                "account" => "nano_1xmastiputrdrhnf35jdh4yj1q339tyuk86w3k6oy5knede8zfowpa1rgjpn",
+                "amount" => "0.0448222",
+                "height" => "32",
+                "hash" => "D26683BA57F53A8C6EC48152DD4396F8ED0579478D2E38F1B3BCC630734D1D08",
+                "confirmed" => "true",
+                "amount_raw" => "1000000000000000000000000000",
+                "from" => "nano_1xmastiputrdrhnf35jdh4yj1q339tyuk86w3k6oy5knede8zfowpa1rgjpn",
+                "to" => "nano_378shkx4k3wd5gxmj3xnjwuxtaf9xrehyz7ugakpiemh8arxq8w9a9xniush",
+                "sender" => "@tree"
             ];
         } else {
             $response = NanoToApi::getNanoTransactionByAmount("nano_378shkx4k3wd5gxmj3xnjwuxtaf9xrehyz7ugakpiemh8arxq8w9a9xniush", "0.001");
@@ -201,7 +216,7 @@ class NanoToApiTest extends TestCase
 
         if ($response) {
             if (!isset($response->error)) {
-                $this->assertObjectHasAttribute("balance", $response);
+                $this->assertObjectHasAttribute("from", $response);
                 $this->assertObjectHasAttribute("hash", $response);
                 $this->assertObjectHasAttribute("account", $response);
                 $this->assertObjectHasAttribute("amount", $response);
@@ -215,10 +230,10 @@ class NanoToApiTest extends TestCase
         if (!$this->use_real_api) {
             $response = (object) [
                 "type" => "receive",
+                "from" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
+                "to" => "nano_3tu8f7jou49pt9u448ck81fc7r7gd6gsdutheewoxqhaibxcceiqegoefx4h",
                 "amount" => "0.02143",
-                "sender" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
-                "recipient" => "nano_3tu8f7jou49pt9u448ck81fc7r7gd6gsdutheewoxqhaibxcceiqegoefx4h",
-                "confirmed" => "true",
+                "height" => 1000,
             ];
         } else {
             $response = NanoToApi::getNanoTransactionByHash("94E74C2EDAE153C181858BD28CFB67BA990EC8D1C43427658A118C947121A995");
@@ -229,10 +244,10 @@ class NanoToApiTest extends TestCase
         if ($response) {
             if (!isset($response->error)) {
                 $this->assertObjectHasAttribute("type", $response);
+                $this->assertObjectHasAttribute("from", $response);
+                $this->assertObjectHasAttribute("to", $response);
                 $this->assertObjectHasAttribute("amount", $response);
-                $this->assertObjectHasAttribute("sender", $response);
-                $this->assertObjectHasAttribute("recipient", $response);
-                $this->assertObjectHasAttribute("confirmed", $response);
+                $this->assertObjectHasAttribute("height", $response);
             }
         }
     }
@@ -242,16 +257,19 @@ class NanoToApiTest extends TestCase
     {
         if (!$this->use_real_api) {
             $response = (object) [
-                "price" => 0.51,
-                "currency" => "$",
+                "price" => "1",
+                "currency" => "USD",
                 "color" => "black,white",
                 "background" => "white,#1B9CFC",
                 "id" => "8819d3e112c",
                 "accept" => [
                     [
                         "symbol" => "nano",
+                        "address" => "nano_3xxxx",
                     ],
                 ],
+                "expiration_unix" => 1654833600,
+                "timestamp" => 1654844412794
             ];
         } else {
             $response = NanoToApi::getCheckoutUrlAsJson("https://nano.to/checkout/8819d3e112c");
@@ -266,6 +284,7 @@ class NanoToApiTest extends TestCase
                 $this->assertObjectHasAttribute("id", $response);
                 $this->assertEquals("8819d3e112c", $response->id);
                 $this->assertObjectHasAttribute("accept", $response);
+                $this->assertObjectHasAttribute("expiration_unix", $response);
             }
         }
     }
@@ -312,7 +331,8 @@ class NanoToApiTest extends TestCase
                 [
                     "name" => "moon",
                     "address" => "nano_37y6iq8m1zx9inwkkcgqh34kqsihzpjfwgp9jir8xpb9jrcwhkmoxpo61f4o",
-                    "expires" => "September 16, 2030"
+                    "expires" => "September 16, 2030",
+                    "expires_unix" => 1915817220,
                 ],
                 [
                     "name" => "alberto",
